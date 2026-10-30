@@ -1,0 +1,22 @@
+# Personal state — never commit
+state/
+output/
+cache/
+profile/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node / Bun
+node_modules/
+
+# Environment and secrets
+.env
+.env.*
+*.token
+
+# OS / editor
+.DS_Store
+Thumbs.db

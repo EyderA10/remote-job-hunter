@@ -1,0 +1,11 @@
+This project is a Typst-based port and extension of:
+
+  ai-job-search
+  Copyright (c) MadsLorentzen
+  https://github.com/MadsLorentzen/ai-job-search
+  Licensed under the MIT License
+
+The original LaTeX-based workflow was ported to Typst and extended with:
+portal clients for GetOnBoard, RemoteOK and We Work Remotely, residence
+enrichment scripts, the scoring engine with hard deal-breaker vetoes,
+and the PDF/ATS verification tooling.
