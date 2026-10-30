@@ -6,7 +6,6 @@ candidate profile with hard deal-breaker vetoes, and generate tailored,
 ATS-verified application documents (CV + cover letter) rendered with
 [Typst](https://typst.app).
 
-Built as a Typst-based port of [MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search) (MIT),
 extended with live-tested portal clients for the Latin-American and remote market.
 
 ## Highlights
