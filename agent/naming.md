@@ -11,7 +11,7 @@ profile/materials/
 ├── cv/                          # Your CV files (PDF or LaTeX)
 ├── linkedin/                    # LinkedIn profile export (PDF)
 ├── diplomas/                    # Degree certificates and transcripts
-├── references/                  # Reference letters
+├── agent/                  # Reference letters
 ├── projects/                    # Independent project summaries, case studies, or portfolio docs
 ├── postings/                    # Raw job posting text, pasted manually for pages Claude can't fetch
 │   └── <Company> - <Job Title>.txt  # Filename = company + job title, content = full posting text
@@ -83,7 +83,7 @@ Degree certificates, transcripts, and any official qualifications.
 
 ---
 
-## references/
+## agent/
 
 Reference letters from former managers, supervisors, or collaborators.
 

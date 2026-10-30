@@ -1,34 +1,33 @@
 #!/usr/bin/env bash
 # manage.sh — guided menu for the job-search tracker.
 #
-# Lets you (without asking Hermes):
+# Lets you run the day-to-day workflow without touching an agent:
 #   - list every application with its status
 #   - change an application's status (drafted/applied/interviewing/offer/rejected/closed)
-#   - open an application's folder, CV, cover letter or PDF in Windows Explorer
 #   - edit any CSV field (notes, contact, deadline...) of one application
-#   - recompile a CV/letter after editing the .typ source (needs typst in the VM)
+#   - open an application's folder, CV, cover letter or PDF (on WSL, in Windows)
+#   - recompile a CV/letter after editing the .typ source (needs typst)
 #   - run the daily search cycle (normal / easy-apply / dry-run)
+#   - sync the latest scored pool to Notion (optional integration)
 #
-# Usage:  bash manage.sh        (menu loop; q to quit)
+# Usage:  bash scripts/manage.sh        (menu loop; q to quit)
 set -uo pipefail
 
-SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CSV="$SKILL_DIR/state/job_search_tracker.csv"
-PY="$HOME/.venvs/job-search/bin/python"
-TYPST="$HOME/.local/bin/typst"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CSV="$REPO_DIR/state/job_search_tracker.csv"
+PY="${JOB_SEARCH_PYTHON:-$HOME/.venvs/job-search/bin/python}"
+[ -x "$PY" ] || PY="$(command -v python3)"
+TYPST="${JOB_SEARCH_TYPST:-$HOME/.local/bin/typst}"
+[ -x "$TYPST" ] || TYPST="$(command -v typst)"
 
 STATUSES=(drafted applied interviewing offer rejected closed)
 
 # ---------- helpers ----------------------------------------------------------
-wslpath_win() { # convert a WSL path to a Windows path, silent on failure
-  wslpath -w "$1" 2>/dev/null
-}
-
-win_open() { # open a file/dir in Windows (Explorer or default app)
+win_open() { # open a file/dir in Windows (WSL convenience; degrades gracefully elsewhere)
   local win
-  win="$(wslpath_win "$1")" || return 1
-  [ -n "$win" ] || { echo "  (no Windows path — are you inside the VM? use the listed paths instead)"; return 1; }
-  cmd.exe /c start "" "$win" >/dev/null 2>&1 && echo "  -> abierto en Windows: $win" || echo "  (no se pudo abrir — abre manualmente: $win)"
+  win="$(wslpath -w "$1" 2>/dev/null)" || return 1
+  [ -n "$win" ] || { echo "  (not a Windows path — open it manually: $1)"; return 1; }
+  cmd.exe /c start "" "$win" >/dev/null 2>&1 && echo "  -> opened in Windows: $win" || echo "  (could not open — open manually: $win)"
 }
 
 list_apps() {
@@ -36,13 +35,13 @@ list_apps() {
 import csv, sys
 rows = list(csv.DictReader(open(sys.argv[1], encoding="utf-8-sig")))
 if not rows:
-    print("  (tracker vacío)"); sys.exit(0)
+    print("  (tracker is empty)"); sys.exit(0)
 print()
-print("=== Tus aplicaciones ===")
+print("=== Your applications ===")
 for i, r in enumerate(rows, 1):
-    print(f"{i}) {r['company']:<12} — {r['role'][:48]:<48} [{r['status']}]  {r['date']}")
+    print(f"{i}) {r['company']:<12} - {r['role'][:48]:<48} [{r['status']}]  {r['date']}")
 print()
-print("Escribe # o nombre de empresa (q = volver):")
+print("Type a # or company name (q = back):")
 PYEOF
 }
 
@@ -62,11 +61,11 @@ if len(hits) == 1:
 PYEOF
 )"
     if [ -n "$choice" ]; then echo "$choice"; return 0; fi
-    echo "  (no coincide — # o nombre de empresa, q para volver)"
+    echo "  (no match — # or company name, q to go back)"
   done
 }
 
-read_row() { # read_row <idx-1based>  → prints CSV row as NUL-safe fields
+read_row() { # read_row <idx-1based>  -> prints CSV row as key=value lines
   "$PY" - "$CSV" "$1" << 'PYEOF'
 import csv, sys
 rows = list(csv.DictReader(open(sys.argv[1], encoding="utf-8-sig")))
@@ -104,20 +103,13 @@ with open(path, newline="", encoding="utf-8-sig") as f:
     rows = list(csv.DictReader(f))
     fields = list(rows[0].keys())
 r = rows[idx - 1]
-print(f"  valor actual de '{field}': {r.get(field, '')}")
+print(f"  current '{field}': {r.get(field, '')}")
 with open(path, "w", newline="", encoding="utf-8") as f:
     w = csv.DictWriter(f, fieldnames=fields)
     w.writeheader(); w.writerows(rows)
 PYEOF
-  local current
-  current="$("$PY" - "$CSV" "$1" "$2" << 'PYEOF'
-import csv, sys
-rows = list(csv.DictReader(open(sys.argv[1], encoding="utf-8-sig")))
-print(rows[int(sys.argv[2]) - 1][sys.argv[3]])
-PYEOF
-)"
-  read -r -p "  nuevo valor (enter para dejar igual): " val
-  [ -z "$val" ] && { echo "  (sin cambios)"; return 0; }
+  read -r -p "  new value (enter to keep current): " val
+  [ -z "$val" ] && { echo "  (unchanged)"; return 0; }
   "$PY" - "$CSV" "$1" "$2" "$val" << 'PYEOF'
 import csv, sys
 path, idx, field, val = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4]
@@ -128,7 +120,7 @@ rows[idx - 1][field] = val
 with open(path, "w", newline="", encoding="utf-8") as f:
     w = csv.DictWriter(f, fieldnames=fields)
     w.writeheader(); w.writerows(rows)
-print(f"  '{field}' actualizado")
+print(f"  '{field}' updated")
 PYEOF
 }
 
@@ -138,11 +130,11 @@ compile_docs() { # compile_docs <idx-1based>
   cv="$(echo "$row" | grep -o 'cv_file=[^ ]*' | cut -d= -f2-)"
   cl="$(echo "$row" | grep -o 'cover_letter_file=[^ ]*' | cut -d= -f2-)"
   for f in "$cv" "$cl"; do
-    [ -n "$f" ] && [ -f "$SKILL_DIR/$f" ] || continue
-    if [ -x "$TYPST" ]; then
-      "$TYPST" compile --root / "$SKILL_DIR/$f" && echo "  PDF: ${f%.typ}.pdf"
+    [ -n "$f" ] && [ -f "$REPO_DIR/$f" ] || continue
+    if [ -n "$TYPST" ] && [ -x "$TYPST" ]; then
+      "$TYPST" compile --root / "$REPO_DIR/$f" && echo "  PDF: ${f%.typ}.pdf"
     else
-      echo "  (typst no está en el VM — pídeselo a Hermes: 'compila $f')"
+      echo "  (typst not found — install it from https://typst.app or compile manually: typst compile $f)"
     fi
   done
 }
@@ -154,36 +146,36 @@ app_menu() { # app_menu <idx-1based>
     "$PY" - << 'PYEOF'
 d = dict(line.split("=", 1) for line in open("/tmp/manage_row.txt", encoding="utf-8").read().splitlines() if "=" in line)
 print()
-print(f"--- {d['company']} — {d['role']} [{d['status']}] ---")
+print(f"--- {d['company']} - {d['role']} [{d['status']}] ---")
 for k in ("sector", "channel", "fit_rating", "contact_person", "deadline", "source"):
     if d.get(k): print(f"  {k:<15}: {d[k][:80]}")
 if d.get("cv_file"):       print(f"  cv            : {d['cv_file']}")
-if d.get("cover_letter_file"): print(f"  carta         : {d['cover_letter_file']}")
-if d.get("notes"):         print(f"  notas         : {d['notes'][:120]}")
+if d.get("cover_letter_file"): print(f"  cover letter  : {d['cover_letter_file']}")
+if d.get("notes"):         print(f"  notes         : {d['notes'][:120]}")
 PYEOF
     cat << 'MENU'
-  1) Cambiar status
-  2) Editar un campo (notas, contacto, deadline...)
-  3) Abrir carpeta de la aplicación en Windows
-  4) Abrir CV (.typ) en Windows
-  5) Abrir carta (.typ) en Windows
-  6) Recompilar CV y carta a PDF
-  7) Ver posting archivado
-  b) Volver   q) Salir
+  1) Change status
+  2) Edit a field (notes, contact, deadline...)
+  3) Open the application folder (Windows / WSL)
+  4) Open the CV (.typ) (Windows / WSL)
+  5) Open the cover letter (.typ) (Windows / WSL)
+  6) Recompile CV and letter to PDF
+  7) View the archived posting
+  b) Back   q) Quit
 MENU
     read -r -p "> " o
     case "$o" in
-      1) echo "  Estados: ${STATUSES[*]}"
-         read -r -p "  nuevo status: " s
+      1) echo "  Statuses: ${STATUSES[*]}"
+         read -r -p "  new status: " s
          echo "$s" | grep -qxE "$(echo "${STATUSES[*]}" | tr ' ' '|')" \
-           && set_status "$idx" "$s" || echo "  (status inválido)"
+           && set_status "$idx" "$s" || echo "  (invalid status)"
          ;;
       2) "$PY" - "$CSV" "$idx" << 'PYEOF'
 import csv, sys
 r = list(csv.DictReader(open(sys.argv[1], encoding="utf-8-sig")))[int(sys.argv[2]) - 1]
-print("  campos:", ", ".join(k for k in r.keys() if k != "status"))
+print("  fields:", ", ".join(k for k in r.keys() if k != "status"))
 PYEOF
-         read -r -p "  campo: " f
+         read -r -p "  field: " f
          [ -n "$f" ] && edit_field "$idx" "$f"
          ;;
       3) local comp; comp="$("$PY" - "$CSV" "$idx" << 'PYEOF'
@@ -191,21 +183,21 @@ import csv, sys
 print(list(csv.DictReader(open(sys.argv[1], encoding="utf-8-sig")))[int(sys.argv[2]) - 1]["company"])
 PYEOF
 )"
-         local base="$SKILL_DIR/state/applications"
+         local base="$REPO_DIR/state/applications"
          local folder; folder="$(ls -d "$base"/*/ 2>/dev/null | grep -i "$comp" | head -1)"
-         [ -n "$folder" ] && win_open "$folder" || echo "  (sin carpeta para '$comp' — la crea Hermes al redactar)"
+         [ -n "$folder" ] && win_open "$folder" || echo "  (no folder for '$comp' yet)"
          ;;
       4) local f; f="$("$PY" - "$CSV" "$idx" << 'PYEOF'
 import csv, sys
 print(list(csv.DictReader(open(sys.argv[1], encoding="utf-8-sig")))[int(sys.argv[2]) - 1]["cv_file"])
 PYEOF
-)"; [ -f "$SKILL_DIR/$f" ] && win_open "$SKILL_DIR/$f" || echo "  (no hay cv_file registrado)"
+)"; [ -f "$REPO_DIR/$f" ] && win_open "$REPO_DIR/$f" || echo "  (no cv_file recorded)"
          ;;
       5) local f; f="$("$PY" - "$CSV" "$idx" << 'PYEOF'
 import csv, sys
 print(list(csv.DictReader(open(sys.argv[1], encoding="utf-8-sig")))[int(sys.argv[2]) - 1]["cover_letter_file"])
 PYEOF
-)"; [ -f "$SKILL_DIR/$f" ] && win_open "$SKILL_DIR/$f" || echo "  (no hay cover_letter_file registrado)"
+)"; [ -f "$REPO_DIR/$f" ] && win_open "$REPO_DIR/$f" || echo "  (no cover_letter_file recorded)"
          ;;
       6) compile_docs "$idx"
          ;;
@@ -214,12 +206,12 @@ import csv, sys
 print(list(csv.DictReader(open(sys.argv[1], encoding="utf-8-sig")))[int(sys.argv[2]) - 1]["company"])
 PYEOF
 )"
-         local folder; folder="$(ls -d "$SKILL_DIR/state/applications"/*/ 2>/dev/null | grep -i "$comp" | head -1)"
-         [ -n "$folder" ] && [ -f "$folder/job_posting.md" ] && win_open "$folder/job_posting.md" || echo "  (sin posting archivado — pídeselo a Hermes)"
+         local folder; folder="$(ls -d "$REPO_DIR/state/applications"/*/ 2>/dev/null | grep -i "$comp" | head -1)"
+         [ -n "$folder" ] && [ -f "$folder/job_posting.md" ] && win_open "$folder/job_posting.md" || echo "  (no archived posting)"
          ;;
       b) return 0 ;;
       q) exit 0 ;;
-      *) echo "  (opción inválida)" ;;
+      *) echo "  (invalid option)" ;;
     esac
   done
 }
@@ -228,12 +220,12 @@ PYEOF
 while true; do
   cat << 'MAIN'
 === Job Search — manage.sh ===
-  1) Ver aplicaciones
-  2) Buscar hoy (normal)
-  3) Buscar hoy (solo Easy Apply)
-  4) Buscar hoy (dry-run, no toca Notion)
-  5) Sincronizar última búsqueda a Notion
-  q) Salir
+  1) View applications
+  2) Search today (normal)
+  3) Search today (Easy Apply only)
+  4) Search today (dry-run, no Notion sync)
+  5) Sync the latest search to Notion
+  q) Quit
 MAIN
   read -r -p "> " o
   case "$o" in
@@ -241,11 +233,11 @@ MAIN
        c="$(pick_app)" && app_menu "$c"
        ;;
 
-    2) bash "$SKILL_DIR/scripts/search.sh" ;;
-    3) bash "$SKILL_DIR/scripts/search.sh" --apply-filter ;;
-    4) bash "$SKILL_DIR/scripts/search.sh" --dry-run --apply-filter ;;
-    5) "$PY" "$SKILL_DIR/scripts/notion_sync.py" "$SKILL_DIR/state/scored-latest.json" ;;
+    2) bash "$REPO_DIR/scripts/search.sh" ;;
+    3) EASY_APPLY=1 bash "$REPO_DIR/scripts/search.sh" ;;
+    4) bash "$REPO_DIR/scripts/search.sh" --dry-run ;;
+    5) "$PY" "$REPO_DIR/scripts/notion_sync.py" "$REPO_DIR/state/scored-latest.json" ;;
     q) exit 0 ;;
-    *) echo "  (opción inválida)" ;;
+    *) echo "  (invalid option)" ;;
   esac
 done

@@ -44,7 +44,7 @@ Read the current state of these files and report whether each has content or is 
 - `framework/05-cv-templates.md` *(profile statements section and the contact block inside the LaTeX template only — framework structure is preserved)*
 - `framework/06-cover-letter-templates.md` *(contact line and signature inside the LaTeX template only — framework structure is preserved)*
 - `framework/07-interview-prep.md` *(STAR examples and STAR candidates sections only — framework structure is preserved)*
-- `references/search-queries.md` *(role titles, domain keywords, and location terms only — query structure is preserved)*
+- `agent/search-queries.md` *(role titles, domain keywords, and location terms only — query structure is preserved)*
 
 This list must stay in step with what `/setup` Step 3 populates: every skill file it writes candidate data into is cleared here.
 
@@ -86,7 +86,7 @@ output/cv/example.tex. This scope covers skill files only.
 
 ### If scope includes `documents`:
 
-Use Glob to list all files present in `profile/materials/cv/`, `profile/materials/linkedin/`, `profile/materials/diplomas/`, `profile/materials/references/`, `profile/materials/projects/`, `profile/materials/postings/`, and `state/applications/`.
+Use Glob to list all files present in `profile/materials/cv/`, `profile/materials/linkedin/`, `profile/materials/diplomas/`, `profile/materials/agent/`, `profile/materials/projects/`, `profile/materials/postings/`, and `state/applications/`.
 
 Include nested and hidden user entries in the inventory. Each subfolder's tracked `.gitkeep` is a scaffold placeholder: exclude it from the deletion list and from the empty/non-empty decision, and preserve it.
 
@@ -104,7 +104,7 @@ profile/materials/linkedin/
 profile/materials/diplomas/
   - [filename] or "(empty)"
 
-profile/materials/references/
+profile/materials/agent/
   - [filename] or "(empty)"
 
 profile/materials/projects/
@@ -116,7 +116,7 @@ profile/materials/postings/
 state/applications/
   - [subfolder/filename] or "(empty)"
 
-references/naming.md — NOT deleted (instructions file)
+agent/naming.md — NOT deleted (instructions file)
 ```
 
 If all document subfolders are already empty, state "All document subfolders are already empty — nothing to delete." and skip the confirmation step for this scope.
@@ -244,7 +244,7 @@ Replace with:
 
 Leave all other content in `07-interview-prep.md` intact (STAR format explanation, tough questions, questions to ask interviewers, phone/video tips, follow-up etiquette, roleplay guidelines).
 
-**For `references/search-queries.md`**, restore the values `/setup` Step 3.9 personalized back to their placeholder tokens:
+**For `agent/search-queries.md`**, restore the values `/setup` Step 3.9 personalized back to their placeholder tokens:
 
 - **Search Sites**: the board names back to `[YOUR_JOB_BOARD]`, `[YOUR_INDUSTRY_JOB_BOARD]`, `[YOUR_ADDITIONAL_JOB_BOARD]`, and the LinkedIn filter back to `[YOUR_COUNTRY]` / `[YOUR_CITY]`.
 - **Query Categories**: the four priority headings back to `[YOUR_PRIMARY_ROLE_TYPE]`, `[YOUR_DOMAIN_EXPERTISE]`, `[YOUR_ADJACENT_ROLE_TYPE]`, and `Broader Technical / Consulting`; inside the query blocks, the titles, skills, and domain terms back to `[YOUR_PRIMARY_JOB_TITLE_1]`, `[YOUR_PRIMARY_JOB_TITLE_2]`, `[YOUR_ADJACENT_TITLE_1]`, `[YOUR_ADJACENT_TITLE_2]`, `[YOUR_KEY_SKILL]`, `[YOUR_DOMAIN_KEYWORD_1]`, `[YOUR_DOMAIN_KEYWORD_2]`, `[YOUR_DOMAIN]`, and the location terms back to `[YOUR_CITY]`, `[YOUR_COUNTRY]`, `[YOUR_REGION]`.
@@ -255,7 +255,7 @@ Leave the rest of the file intact: the portal-CLI and web_search-fallback explan
 
 ### Documents reset
 
-For each non-empty document subfolder, delete all user entries, including nested folders and hidden files. Preserve the seven top-level subfolders, their `.gitkeep` placeholders, and `references/naming.md`. Run the following Bash block only after the confirmation above; its glob settings stay inside the subshell. If `profile/materials/` or any of its seven roots is a symbolic link, stop before deleting anything and ask the user to replace that linked root with a local document folder.
+For each non-empty document subfolder, delete all user entries, including nested folders and hidden files. Preserve the seven top-level subfolders, their `.gitkeep` placeholders, and `agent/naming.md`. Run the following Bash block only after the confirmation above; its glob settings stay inside the subshell. If `profile/materials/` or any of its seven roots is a symbolic link, stop before deleting anything and ask the user to replace that linked root with a local document folder.
 
 ```bash
 (
@@ -302,7 +302,7 @@ Then tell the user what to do next based on what was reset:
 > Note that `framework/01-candidate-profile.md` and `output/cv/example.tex` are outside the `profile` scope and still hold your personal data. If you are handing this fork over or making it public, clear them by hand.
 
 **If documents were reset:**
-> Your user documents are now cleared. The folder structure, `.gitkeep` placeholders, and `references/naming.md` are preserved. Add your career documents and run `/setup` to populate your profile.
+> Your user documents are now cleared. The folder structure, `.gitkeep` placeholders, and `agent/naming.md` are preserved. Add your career documents and run `/setup` to populate your profile.
 
 **If both were reset:**
-> Your profile data and user documents are now cleared; the document folders, `.gitkeep` placeholders, and `references/naming.md` are preserved. Add documents to `profile/materials/` (or skip and use the CV import / interview path), then run `/setup`.
+> Your profile data and user documents are now cleared; the document folders, `.gitkeep` placeholders, and `agent/naming.md` are preserved. Add documents to `profile/materials/` (or skip and use the CV import / interview path), then run `/setup`.

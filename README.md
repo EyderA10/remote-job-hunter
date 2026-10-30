@@ -34,14 +34,18 @@ extended with live-tested portal clients for the Latin-American and remote marke
 
 ```
 portals/          # one CLI per job board (Bun + TypeScript)
-scripts/          # search, scoring, enrichment, PDF verification, tracking
+scripts/          # search, scoring, enrichment, PDF verification, tracking, manage menu
 templates/        # Typst layout contract (CV + cover letter)
 framework/        # evaluation framework: profile templates, fit rubric, style guide
-references/       # per-step workflow docs (scrape, rank, apply, outcome, ...)
-docs/             # setup guides (Notion sync, portal onboarding)
+docs/             # human-friendly guides (start here)
+agent/            # operational instructions for an AI agent running the pipeline
 ```
 
 ## Quick start
+
+Start with the [**User Guide**](docs/user-guide.md) — the 5-minute version of
+the whole loop (search → score → apply → track), plus the `manage.sh` guided
+menu that wraps it all behind five menu options. If you prefer raw commands:
 
 ```bash
 # 1. Fill in your candidate profile (placeholders everywhere)
@@ -54,7 +58,7 @@ bash scripts/scrape-all.sh --query "backend engineer node" --jobage 3 --limit 40
 python3 scripts/score_pool.py state/pool-latest.json --top 25 --out state/scored-latest.json
 
 # 4. Render the CV / cover templates and verify the PDFs
-~/.local/bin/typst compile templates/cv/example.typ
+typst compile templates/cv/example.typ
 python3 scripts/verify_pdf.py templates/cv/example.pdf --pages 2
 ```
 
@@ -64,11 +68,20 @@ Requirements: [Bun](https://bun.sh) (portal CLIs), Python 3 with `pypdf` and
 
 ## Documentation
 
+**For you** (short, plain-language guides):
+
 | Doc | What it covers |
 |---|---|
-| [docs/notion-sync-guide.md](docs/notion-sync-guide.md) | Step-by-step optional Notion integration (create the integration, build the database, wire the env vars) |
-| [docs/portal-onboarding.md](docs/portal-onboarding.md) | How to add a new job board to `scrape-all.sh` |
-| [references/apply-workflow.md](references/apply-workflow.md) | The full drafter-reviewer application workflow |
+| [docs/user-guide.md](docs/user-guide.md) | The full loop in 5 minutes + the `manage.sh` guided menu |
+| [docs/notion-sync-guide.md](docs/notion-sync-guide.md) | Optional Notion integration, step by step |
+| [docs/portal-onboarding.md](docs/portal-onboarding.md) | How to add a new job board |
+
+**For your agent** (long operational references — you can ignore these):
+
+| Doc | What it covers |
+|---|---|
+| [agent/apply-workflow.md](agent/apply-workflow.md) | The full drafter-reviewer application workflow |
+| [agent/](agent/) | All other per-step workflows (scrape, rank, outcome, interview, ...) |
 | [framework/04-job-evaluation.md](framework/04-job-evaluation.md) | Eligibility gate, language gate, deal-breaker vetoes, scoring dimensions |
 
 ## Contributing

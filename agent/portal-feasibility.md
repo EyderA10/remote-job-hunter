@@ -25,7 +25,7 @@ All three CLIs expose the same shape so `/scrape` and `/rank` can treat them uni
 - Every CLI exits non-zero with `{ "error", "code" }` on stderr
 - `enabled: false` in a portal's `SKILL.md` frontmatter removes it from a run (reported as skipped)
 
-`scripts/scrape-all.sh` runs every enabled portal for one query and merges the JSON — that is the executable behind `references/scrape-workflow.md` Step 1b. Verified live: 23 unique postings from 3 portals for the query "AI agent engineer".
+`scripts/scrape-all.sh` runs every enabled portal for one query and merges the JSON — that is the executable behind `agent/scrape-workflow.md` Step 1b. Verified live: 23 unique postings from 3 portals for the query "AI agent engineer".
 
 ## Non-obvious findings
 

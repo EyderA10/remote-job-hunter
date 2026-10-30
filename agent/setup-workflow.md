@@ -14,9 +14,9 @@ Then welcome the user with a single message that lists three paths. The wording 
 
 *(The source-repo template this file was ported from asked about git remote visibility before writing personal data. That does not apply here: this skill is a local directory on the user's machine, not a git checkout, so there is no push to warn about.)*
 
-Then, before greeting the user, scan the `profile/materials/` folder. Use Glob with `profile/materials/**/*` and count files per subfolder (`cv/`, `linkedin/`, `diplomas/`, `references/`, `projects/`, `applications/`).
+Then, before greeting the user, scan the `profile/materials/` folder. Use Glob with `profile/materials/**/*` and count files per subfolder (`cv/`, `linkedin/`, `diplomas/`, `agent/`, `projects/`, `applications/`).
 
-**If the folder is empty, do not stop at Path A.** A CV is the best single source but it is not the only one: public GitHub gives title, bio, location and repo evidence instantly, and the LinkedIn official export gives the Languages table with self-rated proficiency. Rank and use all three — `references/profile-sources.md`. A profile built from a CV plus GitHub plus an interview for the gaps is stronger than one built from a CV alone.
+**If the folder is empty, do not stop at Path A.** A CV is the best single source but it is not the only one: public GitHub gives title, bio, location and repo evidence instantly, and the LinkedIn official export gives the Languages table with self-rated proficiency. Rank and use all three — `agent/profile-sources.md`. A profile built from a CV plus GitHub plus an interview for the gaps is stronger than one built from a CV alone.
 
 Then welcome the user with a single message that lists three paths. The wording changes based on what was found.
 
@@ -26,7 +26,7 @@ Then welcome the user with a single message that lists three paths. The wording 
 >
 > I'll help you build your professional profile so Claude can evaluate job postings, tailor CVs, write cover letters, and prepare you for interviews.
 >
-> I see files in your `profile/materials/` folder: [list per subfolder, e.g. "2 in cv/, 1 in linkedin/, 3 in references/"]. Three ways to start:
+> I see files in your `profile/materials/` folder: [list per subfolder, e.g. "2 in cv/, 1 in linkedin/, 3 in agent/"]. Three ways to start:
 >
 > **Path A: Read my documents folder** (recommended for what you have) - I'll read everything in `profile/materials/`, cross-reference for consistency, and build your profile from real source materials. Idempotent and safe to re-run as you add more documents.
 >
@@ -44,7 +44,7 @@ Then welcome the user with a single message that lists three paths. The wording 
 >
 > Three ways to start:
 >
-> **Path A: Documents folder** (best signal if you have several materials) - Drop your CV / LinkedIn export / diplomas / reference letters / project summaries in the `profile/materials/` folder, then say "go". I'll read everything and build your profile from it. See `references/naming.md` for the folder layout.
+> **Path A: Documents folder** (best signal if you have several materials) - Drop your CV / LinkedIn export / diplomas / reference letters / project summaries in the `profile/materials/` folder, then say "go". I'll read everything and build your profile from it. See `agent/naming.md` for the folder layout.
 >
 > **Path B: Single CV import** - Paste or @-mention a single CV/resume here. I'll extract it and ask follow-up questions for what's missing.
 >
@@ -52,7 +52,7 @@ Then welcome the user with a single message that lists three paths. The wording 
 >
 > Which would you like?
 
-Wait for the user's choice. If they pick A but the folder is still empty, tell them what to add (point at `references/naming.md`) and stop.
+Wait for the user's choice. If they pick A but the folder is still empty, tell them what to add (point at `agent/naming.md`) and stop.
 
 ---
 
@@ -72,14 +72,14 @@ Use Glob with `profile/materials/**/*` to scan the full tree. Print:
 **cv/**: [list files, or "(empty)"]
 **linkedin/**: [list files, or "(empty)"]
 **diplomas/**: [list files, or "(empty)"]
-**references/**: [list files, or "(empty)"]
+**agent/**: [list files, or "(empty)"]
 **projects/**: [list files, or "(empty)"]
 **applications/**: [list subfolders with their files, or "(empty)"]
 
 I will read these and cross-reference before proposing any changes.
 ```
 
-If every subfolder is empty, stop and tell the user to populate the folder. Point at `references/naming.md` for the layout.
+If every subfolder is empty, stop and tell the user to populate the folder. Point at `agent/naming.md` for the layout.
 
 ### Step A2: Read Existing Skill Files
 
@@ -97,7 +97,7 @@ Hold this content in context throughout Path A. Do not re-read.
 
 ### Step A3: Parse Documents
 
-Read each document found in Step A1. Process subfolders in this order: `cv/`, `linkedin/`, `diplomas/`, `references/`, `projects/`, `applications/`.
+Read each document found in Step A1. Process subfolders in this order: `cv/`, `linkedin/`, `diplomas/`, `agent/`, `projects/`, `applications/`.
 
 **`cv/` documents:** name, contact (email, phone, LinkedIn, GitHub), education (degree, institution, dates, thesis), work experience (title, company, dates, location, bullets), skills, languages (with any stated proficiency), publications, awards, profile/summary.
 
@@ -105,7 +105,7 @@ Read each document found in Step A1. Process subfolders in this order: `cv/`, `l
 
 **`diplomas/` documents:** official degree title and level, institution name (official spelling), graduation date, grade or distinction or GPA if visible.
 
-**`references/` documents:** referee name, title, organization; full text of the letter (extract specific quotes); competency language used.
+**`agent/` documents:** referee name, title, organization; full text of the letter (extract specific quotes); competency language used.
 
 **`projects/` documents:** project name, summary/description, problem domain, tech stack (languages, frameworks, tools), key technical challenges and architectural decisions, measurable outcomes/metrics (e.g. users, performance, stars, impact).
 
@@ -234,7 +234,7 @@ Documents cover skills, experience, education, references, and behavioral signal
 - Commute or location constraints (if not visible from CV)
 - Job search configuration (use the questions from Path C Section 9 below)
 
-Then proceed to Step 3 to populate the non-skill files (`framework/01-candidate-profile.md`, `output/cv/example.tex`, `references/search-queries.md`). Step 3 will detect that the seven skill files are already populated and skip those substeps.
+Then proceed to Step 3 to populate the non-skill files (`framework/01-candidate-profile.md`, `output/cv/example.tex`, `agent/search-queries.md`). Step 3 will detect that the seven skill files are already populated and skip those substeps.
 
 ---
 
@@ -325,7 +325,7 @@ Ask about:
 - **Key skills as search terms:** "Which of your skills are most likely to appear in job postings?" Pick 3-5 that are distinctive and searchable.
 - **Target companies (optional):** "Are there specific companies you'd like to monitor for openings?"
 - **Geographic scope:** "Which cities or regions should I search in? How far are you willing to commute?" Use this to define the location filter tiers (ideal, acceptable, borderline, too far).
-- **Job portals:** the skill ships three working CLIs — `linkedin-search` (any market/remote), `getonboard-search` (Spain + LatAm + remote), `remoteok-search` (remote, tech). Each portal's `SKILL.md` frontmatter carries `enabled: true|false`, and `/scrape` skips disabled ones (reported as skipped, never silently dropped). Ask which markets the user wants; flip `enabled:` accordingly. A portal the skill does not have is built with `/add-portal`. **Do not offer portals that are known-blocked from this host** (freehire 403, Indeed/Glassdoor 403, InfoJobs 401) unless the user supplies credentials — see `references/portal-feasibility.md`.
+- **Job portals:** the skill ships three working CLIs — `linkedin-search` (any market/remote), `getonboard-search` (Spain + LatAm + remote), `remoteok-search` (remote, tech). Each portal's `SKILL.md` frontmatter carries `enabled: true|false`, and `/scrape` skips disabled ones (reported as skipped, never silently dropped). Ask which markets the user wants; flip `enabled:` accordingly. A portal the skill does not have is built with `/add-portal`. **Do not offer portals that are known-blocked from this host** (freehire 403, Indeed/Glassdoor 403, InfoJobs 401) unless the user supplies credentials — see `agent/portal-feasibility.md`.
 - **CV language:** "Should your CVs be written in English (the default, accepted in most markets), or in your market's language?" Record the answer as a `CV language: <language>` line in framework/01-candidate-profile.md's Identity section. Cover letters always match each posting's language automatically; this setting governs the CV only. If the user is unsure, keep English and note they can re-run `/setup --section search` to change it.
 
 **Important:** Also suggest role types the user may not have considered, based on their skill profile. For example:
@@ -375,9 +375,9 @@ Compile the filled template and check it before reporting success:
 ~/.venvs/job-search/bin/python scripts/verify_pdf.py templates/cv/example.pdf --pages 2 --ascii-dates
 ```
 
-It must land on **exactly 2 pages** with an extractable text layer. If it is 3, cut by relevance (see the relevance-weighted rule in `references/apply-workflow.md`), not by shrinking the type. If it is 1, the profile is too thin — go back and get more experience detail.
+It must land on **exactly 2 pages** with an extractable text layer. If it is 3, cut by relevance (see the relevance-weighted rule in `agent/apply-workflow.md`), not by shrinking the type. If it is 1, the profile is too thin — go back and get more experience detail.
 
-### 9. Generate `references/search-queries.md`
+### 9. Generate `agent/search-queries.md`
 Replace all placeholder tokens in the search queries file with the user's actual information from Section 9 (or the equivalent follow-up questions in Path A's Step A7):
 - Replace `[YOUR_PRIMARY_ROLE_TYPE]`, `[YOUR_PRIMARY_JOB_TITLE]`, etc. with actual role titles
 - Replace `[YOUR_KEY_SKILL]`, `[YOUR_DOMAIN_KEYWORD_1]`, etc. with actual skills and domain terms
@@ -403,7 +403,7 @@ Present a summary:
 > - `templates/cv/example.typ` - CV template with your real details in its fill block
 > - `templates/cover/example.typ` - Cover letter template with your identity block
 > - `framework/07-interview-prep.md` - STAR examples from your experience
-> - `references/search-queries.md` - Job search queries for `/scrape`
+> - `agent/search-queries.md` - Job search queries for `/scrape`
 >
 > **Privacy note:** the profile files now hold your personal data. They live only in this skill directory on your machine and are not synced anywhere; the only outbound step is the CV and cover letter you choose to submit.
 >
@@ -424,7 +424,7 @@ The user may answer these questions from a *different* Hermes session (a TUI, a 
 
 1. **Enumerate the open markers, not your memory of them.** Grep the framework files for `[TO CONFIRM` and produce the exact numbered question list, each with its `file:line` and the literal text being asked. The user answers by number, so the list must be complete and unambiguous — a missed marker means a question that never gets asked, and a reworded one means an answer that lands in the wrong field.
 2. **Map numbered answers onto markers positionally, then verify each landing.** A one-line answer can be ambiguous ("No" — to which question?). Write each answer to its marker, and where an answer could fit more than one field, say which field you chose and why.
-3. **Write the answers into the files, then re-grep to confirm none remain.** The confirmation is the point: `grep -rn "TO CONFIRM" framework/ references/` must come back empty (or showing only items the user explicitly deferred) before you report the profile ready.
+3. **Write the answers into the files, then re-grep to confirm none remain.** The confirmation is the point: `grep -rn "TO CONFIRM" framework/ agent/` must come back empty (or showing only items the user explicitly deferred) before you report the profile ready.
 4. **Flag anything the user did not understand.** If an answer is "I don't know what you mean", stop and explain the field in plain language rather than writing a guess — an unexplained field is a question the user will not be able to answer later either.
 
 Report the result as: what was written where, what is still open, and whether the profile is ready for the next step. Do not start the next step until the open list is empty or the user has explicitly deferred the remainder.

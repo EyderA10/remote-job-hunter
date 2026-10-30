@@ -43,8 +43,8 @@ Read all files in `profile/materials/diplomas/`. Extract:
 - Thesis title and subject area
 - Any specialisation or track name
 
-### 1d. profile/materials/references/
-Read all files in `profile/materials/references/`. Extract:
+### 1d. profile/materials/agent/
+Read all files in `profile/materials/agent/`. Extract:
 - Competency language used by the referee (what skills or qualities they mention)
 - Any specific projects, tools, or methods named
 

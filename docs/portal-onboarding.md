@@ -33,7 +33,7 @@ bun run portals/<name>-search/cli/src/cli.ts detail <id|url> --format plain
 ```
 
 The authoring contract (output schema, argument parsing, robots.txt etiquette)
-is described in `references/portal-cli-authoring.md`.
+is described in `agent/portal-cli-authoring.md`.
 
 ## 3. Register it in scrape-all.sh
 

@@ -41,7 +41,7 @@ Follow these steps **in order**.
 
    **Deadline urgency is the one clock that does apply to a drafted row.** Show the `deadline` column when the row has one and leave it blank otherwise. Mark a deadline within 7 days with 🔥 and one that has already passed with ⚠, on the same 7-day threshold `/rank` Step 3 uses so the two commands never disagree. A passed deadline on a `drafted` row is the failure this column exists to catch - documents written, never sent, and now unsendable - so name it in one line under the table rather than leaving the user to compare dates. This changes nothing about the follow-up offer: a drafted row is still never chased, because nobody is late replying to something that was never sent.
 
-4. Derive the archive folder name: `state/applications/<company>_<role>/` by the **Subfolder naming** rule in `references/naming.md`. Check whether the folder and an `outcome.md` already exist - if so, you are updating, not creating.
+4. Derive the archive folder name: `state/applications/<company>_<role>/` by the **Subfolder naming** rule in `agent/naming.md`. Check whether the folder and an `outcome.md` already exist - if so, you are updating, not creating.
 
 ---
 
@@ -58,7 +58,7 @@ This deployment's guided menu (`scripts/manage.sh`) additionally offers the user
 - **`drafted`** is open but distinct — nothing was sent, so no follow-up is ever due.
 - Readers must also accept the legacy space spellings `no response` and `offer declined` on read, so that existing trackers keep working without a migration. Never write them — they are the same values as `no_response` and `offer_declined`, not separate statuses, equally **Final**, and every rule that names one applies to the other.
 
-> Distinct from the archive `Status:` enum in `references/naming.md`
+> Distinct from the archive `Status:` enum in `agent/naming.md`
 > (`in_progress` | `hired` | `offer_declined` | `rejected` | `no_response` | `interview_only`),
 > which describes the per-application `outcome.md` file, not this column. The two enums
 > are never written to the same field.
@@ -73,7 +73,7 @@ Ask the user what happened, then classify:
 - Interview invitation / stage scheduled or completed (phone screen, technical, case, final round)
 - Offer received (not yet accepted or declined)
 
-**Resolutions** (application closed) — these map to the archive `Status:` enum in `references/naming.md` that `/setup` parses (distinct from the tracker CSV column; see **Tracker status vocabulary** above):
+**Resolutions** (application closed) — these map to the archive `Status:` enum in `agent/naming.md` that `/setup` parses (distinct from the tracker CSV column; see **Tracker status vocabulary** above):
 - `hired` - accepted an offer
 - `offer_declined` - received an offer, turned it down
 - `rejected` - explicit rejection at any stage
@@ -163,9 +163,9 @@ Wait for the user's explicit response before writing anything.
 
 Create or update `state/applications/<company>_<role>/`. All content here is personal data - the folder is already gitignored (`state/applications/**`), so nothing needs redacting.
 
-1. **`cv_draft.tex` and `cover_letter.tex`** - copy (never move) the submitted files. Locate them via the tracker row's `cv_file`/`cover_letter_file` columns; if those are empty, look for `output/cv/<company>_<role>.*` and `output/cover_letters/<company>_<role>.*`, deriving `<company>_<role>` by the **Subfolder naming** rule in `references/naming.md`. **Never widen those globs to the company alone** - two roles at one company both match it, and the first hit wins silently. If a file already exists in the archive, leave it - the archived version is what was actually submitted. If nothing matches (application made outside `/apply`), skip with a note rather than widening the search: a sibling role's CV recorded as what you submitted is worse than no file at all.
+1. **`cv_draft.tex` and `cover_letter.tex`** - copy (never move) the submitted files. Locate them via the tracker row's `cv_file`/`cover_letter_file` columns; if those are empty, look for `output/cv/<company>_<role>.*` and `output/cover_letters/<company>_<role>.*`, deriving `<company>_<role>` by the **Subfolder naming** rule in `agent/naming.md`. **Never widen those globs to the company alone** - two roles at one company both match it, and the first hit wins silently. If a file already exists in the archive, leave it - the archived version is what was actually submitted. If nothing matches (application made outside `/apply`), skip with a note rather than widening the search: a sibling role's CV recorded as what you submitted is worse than no file at all.
 2. **`job_posting.md`** - if it already exists, leave it. Otherwise try web_extract on the tracker row's `source` URL, retrying a 403 with browser headers per `framework/09-web-research.md`, run the result through `python3 scripts/posting_guard.py` (`--html` on a saved page, `--text` otherwise) and save the **cleaned** text plus a `## posting_guard` section with the verdict and finding counts only, exactly as `/apply` Step 6b does. If the URL is dead (postings expire fast - this is exactly why the archive matters), ask the user to paste the posting, or write a stub noting the posting is unavailable. **Never reconstruct a posting from memory.**
-3. **`outcome.md`** - write or update it in exactly the format documented in `references/naming.md`, so `/setup` Path A parses it without special cases:
+3. **`outcome.md`** - write or update it in exactly the format documented in `agent/naming.md`, so `/setup` Path A parses it without special cases:
 
 ```markdown
 # Outcome: <Company> — <Role>
@@ -237,7 +237,7 @@ If the recorded status is `hired`, congratulate the user warmly first - this is 
 1. **Write data, don't interpret it.** The archive and tracker are the outputs; calibration belongs to `/setup`. This command never edits profile or framework files.
 2. **The archived version is the submitted version.** Existing files in the application folder are never overwritten by fresher drafts.
 3. **Never fabricate.** A dead posting URL gets a user-pasted copy or an explicit "unavailable" stub, not a reconstruction. Feedback is recorded as the user reports it.
-4. **Stay schema-compatible.** `outcome.md` follows the format in `references/naming.md` exactly (`in_progress` is the one addition, for open applications); the tracker keeps its columns.
+4. **Stay schema-compatible.** `outcome.md` follows the format in `agent/naming.md` exactly (`in_progress` is the one addition, for open applications); the tracker keeps its columns.
 5. **Idempotent updates.** Re-running on the same application appends new stages and notes; it never duplicates folders, rows, or history.
 6. **Follow-ups: draft only, never send.** The follow-up branch produces text for the user to send themselves. It never emails, messages, or submits anything, and it must not be wired to tools that do.
 7. **Follow-ups: no new claims.** Every substantive statement in a follow-up or thank-you note comes from the archived submitted materials. Rule 3 applies with no exceptions.
